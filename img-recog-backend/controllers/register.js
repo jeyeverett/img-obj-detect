@@ -1,10 +1,6 @@
 const jwt = require("jsonwebtoken");
-const redis = require("redis");
 
-// Setup Redis
-const redisClient = redis.createClient(process.env.REDIS_URL);
-
-const setToken = (key, value) => {
+const setToken = (key, value, redisClient) => {
   return Promise.resolve(redisClient.set(key, value));
 };
 
@@ -13,10 +9,10 @@ const signToken = (email) => {
   return jwt.sign(jwtPayload, process.env.JWT_SECRET, { expiresIn: "2 days" });
 };
 
-const createSession = async (user) => {
+const createSession = async (user, redisClient) => {
   const { email, id } = user;
   const token = signToken(email);
-  await setToken(token, id);
+  await setToken(token, id, redisClient);
   return {
     user: { ...user },
     success: "true",
@@ -24,7 +20,7 @@ const createSession = async (user) => {
   };
 };
 
-module.exports.handleRegister = (req, res, db, bcrypt) => {
+module.exports.handleRegister = (req, res, db, bcrypt, redisClient) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
@@ -67,7 +63,7 @@ module.exports.handleRegister = (req, res, db, bcrypt) => {
             joined: new Date(),
           })
           .then((user) => {
-            return createSession(user[0]);
+            return createSession(user[0], redisClient);
           })
           .then((data) => {
             return res.status(200).json(data);

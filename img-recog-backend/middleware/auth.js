@@ -1,7 +1,7 @@
 const redis = require("redis");
 
 // Setup Redis
-const redisClient = redis.createClient(process.env.REDIS_URI);
+const redisClient = redis.createClient(process.env.REDIS_URL);
 
 module.exports.requireAuth = (req, res, next) => {
   const { authorization } = req.headers;

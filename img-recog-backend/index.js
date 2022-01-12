@@ -3,6 +3,7 @@ const app = express();
 const bcrypt = require("bcryptjs");
 const cors = require("cors"); //No CORS is the default, so we use this package to enable CORS which we need to link our backend with our frontend
 const morgan = require("morgan");
+const redis = require("redis");
 
 const register = require("./controllers/register");
 const signin = require("./controllers/signin");
@@ -23,6 +24,9 @@ const db = require("knex")({
     `postgresql://postgres:postgres@localhost:5432/img-recog`,
 });
 
+// Setup Redis
+const redisClient = redis.createClient(process.env.REDIS_URL);
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
@@ -31,15 +35,15 @@ app.get("/", (req, res) => res.json("home"));
 
 //Passing in db and bcrypt to our register controller file is called dependency injection
 app.post("/signin", (req, res) => {
-  signin.handleAuthSignin(req, res, db, bcrypt);
+  signin.handleAuthSignin(req, res, db, bcrypt, redisClient);
 });
 
 app.post("/signout", auth.requireAuth, (req, res) => {
-  signout.handleSignout(req, res);
+  signout.handleSignout(req, res, redisClient);
 });
 
 app.post("/register", (req, res) => {
-  register.handleRegister(req, res, db, bcrypt);
+  register.handleRegister(req, res, db, bcrypt, redisClient);
 });
 
 app.get("/profile/:id", auth.requireAuth, (req, res) => {
