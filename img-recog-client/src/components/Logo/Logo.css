@@ -1,0 +1,11 @@
+.Tilt {
+    background: linear-gradient(90deg, #777777 0%, #eeeeee 100%);
+}
+
+@media only screen and (max-width: 45em) {
+    .logo {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+}
