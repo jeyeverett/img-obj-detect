@@ -1,8 +1,8 @@
-const jwt = require('jsonwebtoken');
-const redis = require('redis');
+const jwt = require("jsonwebtoken");
+const redis = require("redis");
 
 // Setup Redis
-const redisClient = redis.createClient(process.env.REDIS_URI);
+const redisClient = redis.createClient(process.env.REDIS_URL);
 
 const setToken = (key, value) => {
   return Promise.resolve(redisClient.set(key, value));
@@ -10,7 +10,7 @@ const setToken = (key, value) => {
 
 const signToken = (email) => {
   const jwtPayload = { email };
-  return jwt.sign(jwtPayload, process.env.JWT_SECRET, { expiresIn: '2 days' });
+  return jwt.sign(jwtPayload, process.env.JWT_SECRET, { expiresIn: "2 days" });
 };
 
 const createSession = async (user) => {
@@ -19,7 +19,7 @@ const createSession = async (user) => {
   await setToken(token, id);
   return {
     user: { ...user },
-    success: 'true',
+    success: "true",
     token,
   };
 };
@@ -30,12 +30,12 @@ module.exports.handleRegister = (req, res, db, bcrypt) => {
   if (!name || !email || !password) {
     return res
       .status(400)
-      .json('Incorrect form submission - missing user information.');
+      .json("Incorrect form submission - missing user information.");
   }
 
   // Not checking passwords yet - will implement later ******
   const formatPass = new RegExp(
-    '^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})'
+    "^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})"
   );
 
   const formatEmail = new RegExp(
@@ -44,8 +44,8 @@ module.exports.handleRegister = (req, res, db, bcrypt) => {
   //Need to add password match later: !password.match(formatPass)
   if (!email.match(formatEmail)) {
     const message =
-      'Error with credentials - email must be formatted as example@example.com - password..';
-    return res.status(404).json(['Failed', { success: false, message }]); //On the front end we check for user[1].success, so I am returning an array here just to be consistent (i.e. so user[1].success is defined whether the registration is successful or not)
+      "Error with credentials - email must be formatted as example@example.com - password..";
+    return res.status(404).json(["Failed", { success: false, message }]); //On the front end we check for user[1].success, so I am returning an array here just to be consistent (i.e. so user[1].success is defined whether the registration is successful or not)
   }
 
   const hash = bcrypt.hashSync(password, 10);
@@ -56,11 +56,11 @@ module.exports.handleRegister = (req, res, db, bcrypt) => {
         hash: hash,
         email: email,
       })
-      .into('login')
-      .returning('email')
+      .into("login")
+      .returning("email")
       .then((loginEmail) => {
-        return trx('users')
-          .returning('*')
+        return trx("users")
+          .returning("*")
           .insert({
             email: loginEmail[0],
             name: name,
@@ -76,10 +76,10 @@ module.exports.handleRegister = (req, res, db, bcrypt) => {
       .then(trx.commit) //we have to commit the transaction at the end
       .catch(trx.rollback); //if there were any issues, we rollback everything to its initial state
   }).catch((err) => {
-    if (err.detail.includes('already exists')) {
-      res.status(400).json('Email already in use.');
+    if (err.detail.includes("already exists")) {
+      res.status(400).json("Email already in use.");
     } else {
-      res.status(400).json('Unable to register user.');
+      res.status(400).json("Unable to register user.");
     }
   });
 };

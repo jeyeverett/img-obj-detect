@@ -18,7 +18,9 @@ if (process.env.NODE_ENV !== "production") {
 //Knex is a package used to interact with a relational database
 const db = require("knex")({
   client: "pg",
-  connection: process.env.DATABASE_URL,
+  connection:
+    process.env.DATABASE_URL ||
+    `postgresql://postgres:postgres@localhost:5432/img-recog`,
 });
 
 app.use(express.urlencoded({ extended: true }));
@@ -52,7 +54,6 @@ app.put("/image", auth.requireAuth, (req, res) => {
   image.handleEntries(req, res, db);
 });
 
-//Moved Clarifai API to backend because otherwise our API key would be visible over the network
 app.post("/imageurl", auth.requireAuth, (req, res) => {
   image.handleApiCall(req, res);
 });
