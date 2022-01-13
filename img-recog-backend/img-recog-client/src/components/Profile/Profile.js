@@ -82,7 +82,7 @@ class Profile extends React.Component {
               Bio
             </label>
             <textarea
-              className="pa2 ba w-100 h4 f6 style-4"
+              className="pa2 ba w-100 h3 h4-ns f6 style-4"
               type="text"
               name="bio"
               id="bio"
@@ -93,6 +93,15 @@ class Profile extends React.Component {
             <div className="flex justify-center">
               <button
                 className="br2 b--dark ph3 pv1 fw6 shadow-5 grow"
+                style={{
+                  backgroundColor: "rgba(255,255,255,.5)",
+                }}
+                onClick={toggleModal}
+              >
+                Cancel
+              </button>
+              <button
+                className="br2 b--dark ph3 pv1 fw6 shadow-5 grow ml2"
                 style={{
                   backgroundColor: "rgba(255,255,255,.5)",
                 }}

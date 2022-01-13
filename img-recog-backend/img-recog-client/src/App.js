@@ -210,10 +210,7 @@ class App extends Component {
           toggleModal={this.toggleModal}
           isLoading={isLoading}
         />
-        <div
-          className="App w-80 w-60-ns"
-          style={{ margin: "0 auto", marginTop: "8rem", marginBottom: "4rem" }}
-        >
+        <div className="App w-80 w-60-ns center mb4 mt5 mt6-ns">
           {isProfileOpen && (
             <Modal>
               <Profile

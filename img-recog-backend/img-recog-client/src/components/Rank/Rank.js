@@ -14,7 +14,7 @@ const Rank = ({ entries, name }) => {
             tag="h3"
           >{`${name}, you've detected ${entries} ${
             entries > 1 ? "different" : ""
-          } object${entries > 1 ? "s" : ""}!`}</CardTitle>
+          } object${entries !== 1 ? "s" : ""}!`}</CardTitle>
         </CardBody>
       </Card>
     </div>
