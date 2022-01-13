@@ -52,13 +52,8 @@ class App extends Component {
 
           const { user, leaderboard, error } = await profileRes.json();
 
-          if (error) {
-            this.setState({ serverError: error });
-          }
-
           if (user && user.email) {
-            this.loadUser(user);
-            this.setState({ leaderboard });
+            this.loadUser({ user, leaderboard, error });
             this.onRouteChange("home");
           }
         }
@@ -68,18 +63,20 @@ class App extends Component {
     }
   }
 
-  loadUser = (data) => {
-    this.setState({
+  loadUser = ({ user, leaderboard, error }) => {
+    this.setState((state) => ({
+      leaderboard: leaderboard || state.leaderboard,
+      serverError: error ? error : "",
       user: {
-        id: data.id,
-        name: data.name,
-        email: data.email,
-        entries: data.entries,
-        joined: data.joined,
-        bio: data.bio,
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        entries: user.entries,
+        joined: user.joined,
+        bio: user.bio,
       },
       isLoading: false,
-    });
+    }));
   };
 
   onInputChange = ({ target }) => {
@@ -201,8 +198,8 @@ class App extends Component {
 
     return (
       <div
-        className="App w-80 w-60-ns mb4"
-        style={{ margin: "0 auto", marginTop: "8rem" }}
+        className="App w-80 w-60-ns"
+        style={{ margin: "0 auto", marginTop: "8rem", marginBottom: "4rem" }}
       >
         <Navigation
           isSignedIn={isSignedIn}

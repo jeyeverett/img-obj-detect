@@ -1,4 +1,4 @@
-module.exports.handleSignout = (req, res) => {
+module.exports.handleSignout = (req, res, redisClient) => {
   const { authorization } = req.headers;
   const { id } = req.body;
 

@@ -36,8 +36,11 @@ class Register extends React.Component {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          window.sessionStorage.setItem("token", data.token);
-          this.props.loadUser(data.user);
+          window.sessionStorage.setItem("token", data.userData.token);
+          this.props.loadUser({
+            user: data.userData.user,
+            leaderboard: data.leaderboard,
+          });
           this.props.onRouteChange("home");
         }
       })

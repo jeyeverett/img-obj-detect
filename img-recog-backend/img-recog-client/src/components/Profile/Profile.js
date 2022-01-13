@@ -33,7 +33,7 @@ class Profile extends React.Component {
       .then((res) => res.json())
       .then((user) => {
         if (user.id) {
-          this.props.loadUser(user);
+          this.props.loadUser({ user });
           this.props.toggleModal();
         }
       })

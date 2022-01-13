@@ -12,7 +12,9 @@ const Rank = ({ entries, name }) => {
           <CardTitle
             className="f4 f3-ns b mb0"
             tag="h3"
-          >{`${name}, you've detected ${entries} different objects!`}</CardTitle>
+          >{`${name}, you've detected ${entries} ${
+            entries > 1 ? "different" : ""
+          } object${entries > 1 ? "s" : ""}!`}</CardTitle>
         </CardBody>
       </Card>
     </div>

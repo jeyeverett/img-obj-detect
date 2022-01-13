@@ -49,10 +49,10 @@ class SignIn extends React.Component {
           }
         );
 
-        const user = await res.json();
+        const { user, leaderboard, error } = await res.json();
 
         if (user && user.email) {
-          this.props.loadUser(user);
+          this.props.loadUser({ user, leaderboard, error });
           this.props.onRouteChange("home");
         }
       }

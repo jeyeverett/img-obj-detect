@@ -16,10 +16,7 @@ const Navigation = ({ onRouteChange, isSignedIn, toggleModal, isLoading }) => {
     return isLoading ? (
       ""
     ) : (
-      <nav
-        className="mt2"
-        style={{ display: "flex", justifyContent: "flex-end" }}
-      >
+      <nav style={{ display: "flex", justifyContent: "flex-end" }}>
         <p
           onClick={() => onRouteChange("signin")}
           className="f4 link dim grey ph4 pointer"
