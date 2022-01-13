@@ -1,8 +1,9 @@
 const express = require("express");
 const app = express();
 const bcrypt = require("bcryptjs");
-const cors = require("cors"); //No CORS is the default, so we use this package to enable CORS which we need to link our backend with our frontend
+const cors = require("cors");
 const morgan = require("morgan");
+const path = require("path");
 const redis = require("redis");
 
 const register = require("./controllers/register");
@@ -12,26 +13,42 @@ const image = require("./controllers/image");
 const profile = require("./controllers/profile");
 const auth = require("./middleware/auth");
 
-//This just allows us to use our environment valuables in development mode
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
-//Knex is a package used to interact with a relational database
+
 const db = require("knex")({
   client: "pg",
-  connection:
-    process.env.DATABASE_URL ||
-    `postgresql://postgres:postgres@localhost:5432/img-recog`,
+  connection: process.env.DATABASE_URL || process.env.POSTGRES_URI,
 });
 
-// Setup Redis
-const redisClient = redis.createClient(process.env.REDIS_URL);
+const redisClient = redis.createClient(
+  process.env.REDIS_URL || process.env.REDIS_URI
+);
+
+app.use((req, res, next) => {
+  res.setHeader(
+    "Access-Control-Allow-Origin",
+    process.env.HOSTNAME || "https://img-recog-api.herokuapp.com"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "OPTIONS, GET, POST, PUT, PATCH, DELETE"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  return next();
+});
+
+// app.use(express.static(path.join(__dirname, "img-recog-client/build")));
+
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(__dirname, "img-recog-client/build", "index.html"));
+// });
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
 app.use(morgan("combined"));
-app.get("/", (req, res) => res.json("home"));
 
 //Passing in db and bcrypt to our register controller file is called dependency injection
 app.post("/signin", (req, res) => {
@@ -60,6 +77,11 @@ app.put("/image", auth.requireAuth, (req, res) => {
 
 app.post("/imageurl", auth.requireAuth, (req, res) => {
   image.handleApiCall(req, res);
+});
+
+app.use((error, req, res, next) => {
+  console.log(error);
+  next();
 });
 
 const PORT = process.env.PORT || 8080;

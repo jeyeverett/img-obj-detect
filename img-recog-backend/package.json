@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "start:dev": "nodemon --ignore './img-recog-client' index.js --legacy-watch"
   },
   "keywords": [],
   "author": "",

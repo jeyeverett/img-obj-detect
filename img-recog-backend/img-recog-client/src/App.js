@@ -1,38 +1,24 @@
 import React, { Component } from "react";
+import { initialState } from "./initialState";
 import "./App.css";
+
 import Navigation from "./components/Navigation/Navigation";
 import SignIn from "./components/SignIn/SignIn";
 import Register from "./components/Register/Register";
 import ImageLoader from "./components/ImageLoader/ImageLoader";
 import Rank from "./components/Rank/Rank";
-import FaceRecognition from "./components/FaceRecognition/FaceRecognition";
+import Leaderboard from "./components/Leaderboard/Leaderboard";
+import Detector from "./components/Detector/Detector";
 import Modal from "./components/Modal/Modal";
 import Profile from "./components/Profile/Profile";
 import { Button, ButtonGroup } from "reactstrap";
 
-const initialState = {
-  input: "",
-  imageURL: "",
-  urlError: false,
-  fileUpload: false,
-  route: "signin",
-  isSignedIn: false,
-  isProfileOpen: false,
-  isLoading: false,
-  user: {
-    id: "",
-    name: "",
-    email: "",
-    entries: 0,
-    joined: "",
-    bio: "",
-  },
-};
 class App extends Component {
   constructor() {
     super();
     this.state = initialState;
   }
+
   componentDidMount() {
     const token = window.sessionStorage.getItem("token");
     if (token) {
@@ -84,7 +70,7 @@ class App extends Component {
     });
   };
 
-  onInputChange = async ({ target }) => {
+  onInputChange = ({ target }) => {
     if (this.state.fileUpload && target.files.length) {
       const uploadedImageUrl = URL.createObjectURL(target.files[0]);
       this.setState({ input: uploadedImageUrl });
@@ -97,7 +83,6 @@ class App extends Component {
           this.setState({ urlError: true });
         }
       });
-      return;
     }
   };
 
@@ -119,45 +104,35 @@ class App extends Component {
     }
   };
 
+  setDetectionResults = (results) => {
+    this.setState({ detectionResults: results });
+    this.onDetectionResults(results);
+  };
+
   onDetectImage = (event) => {
     this.setState({ imageURL: this.state.input });
-    return;
+  };
 
+  onDetectionResults = async (results) => {
     const token = window.sessionStorage.getItem("token");
-    fetch(`${process.env.REACT_APP_HOSTNAME}/imageurl`, {
-      method: "post",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-      body: JSON.stringify({
-        input: this.state.input,
-        id: this.state.user.id,
-      }),
-    })
-      .then((res) => res.json())
-      .then((res) => {
-        if (res) {
-          //If there is a response increment the entries field on the backend
-          fetch(`${process.env.REACT_APP_HOSTNAME}/image`, {
-            method: "put",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: "Bearer " + token,
-            },
-            body: JSON.stringify({
-              id: this.state.user.id,
-            }),
-          })
-            .then((res) => res.json())
-            .then((count) => {
-              this.setState(Object.assign(this.state.user, { entries: count }));
-            })
-            .catch((err) => console.log(err));
-          this.processFaceDetection(res.outputs[0].data.regions);
-        }
-      })
-      .catch((err) => console.log("Face detection error."));
+    try {
+      const res = await fetch(`${process.env.REACT_APP_HOSTNAME}/image`, {
+        method: "put",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+        body: JSON.stringify({
+          id: this.state.user.id,
+          results,
+        }),
+      });
+
+      const entries = await res.json();
+      this.setState(Object.assign(this.state.user, { entries }));
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   onRouteChange = (route) => {
@@ -204,7 +179,10 @@ class App extends Component {
     } = this.state;
 
     return (
-      <div className="App">
+      <div
+        className="App w-80 w-60-ns"
+        style={{ margin: "0 auto", marginTop: "8rem" }}
+      >
         <Navigation
           isSignedIn={isSignedIn}
           onRouteChange={this.onRouteChange}
@@ -228,7 +206,11 @@ class App extends Component {
               entries={this.state.user.entries}
             />
             {imageURL && (
-              <FaceRecognition imageURL={imageURL} faceBoxes={faceBoxes} />
+              <Detector
+                imageURL={imageURL}
+                faceBoxes={faceBoxes}
+                setDetectionResults={this.setDetectionResults}
+              />
             )}
             {urlError && (
               <div className="mb2 dark-red">
@@ -259,6 +241,7 @@ class App extends Component {
                 File
               </Button>
             </ButtonGroup>
+            <Leaderboard />
           </div>
         ) : route === "signin" ? (
           <SignIn

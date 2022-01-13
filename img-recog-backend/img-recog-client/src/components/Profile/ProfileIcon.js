@@ -1,4 +1,6 @@
 import React from "react";
+import "./Profile.css";
+
 import {
   Dropdown,
   DropdownToggle,
@@ -20,7 +22,12 @@ class ProfileIcon extends React.Component {
   render() {
     const { dropdownOpen } = this.state;
     return (
-      <Dropdown isOpen={dropdownOpen} toggle={this.toggle} className="pa3">
+      <Dropdown
+        isOpen={dropdownOpen}
+        toggle={this.toggle}
+        className="pa3 dropdown"
+        style={{ position: "fixed" }}
+      >
         <DropdownToggle
           tag="span"
           data-toggle="dropdown"
@@ -34,10 +41,10 @@ class ProfileIcon extends React.Component {
           />
         </DropdownToggle>
         <DropdownMenu
-          className={`b--transparent shadow-5 mt4 overflow-hidden ${
+          className={`shadow-5 mt4 overflow-hidden ${
             dropdownOpen ? "w-auto" : "w-0"
           }`}
-          style={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+          style={{ backgroundColor: "rgba(255,255,255,0.75)" }}
           right
         >
           <DropdownItem onClick={() => this.props.onRouteChange("home")}>

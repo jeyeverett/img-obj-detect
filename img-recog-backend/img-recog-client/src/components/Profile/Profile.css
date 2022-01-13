@@ -22,7 +22,7 @@
 }
 
 h1 {
-  font-family: 'Courier New';
+  font-family: "Courier New";
 }
 
 .exit-profile:hover {
@@ -43,4 +43,10 @@ h1 {
 .style-4::-webkit-scrollbar-thumb {
   background-color: #000000;
   border: 2px solid #555555;
+}
+
+.dropdown {
+  top: 0;
+  right: 0;
+  z-index: 10000;
 }

@@ -1,15 +1,19 @@
 import React, { useRef, useState } from "react";
 import { detectObjects } from "../../lib/tensorflow";
 import LoadingSpinner from "../LoadingSpinner/LoadingSpinner";
+import styles from "./Detector.module.css";
 
-const FaceRecognition = ({ imageURL }) => {
+const Detector = ({ imageURL, setDetectionResults }) => {
   const [loading, setLoading] = useState(false);
   const [imageHeight, setHeight] = useState(null);
   const [imageWidth, setWidth] = useState(null);
+  const [detectionError, setDetectionError] = useState(false);
   const imgContainer = useRef();
   const canvas = useRef();
 
   const onImageLoad = async () => {
+    setDetectionError(false);
+
     const { height, width } = imgContainer.current;
 
     const ctx = canvas.current.getContext("2d");
@@ -20,8 +24,14 @@ const FaceRecognition = ({ imageURL }) => {
     setHeight(height);
 
     setLoading(true);
-    const result = await detectObjects(imgContainer.current, ctx);
+    const results = await detectObjects(imgContainer.current, ctx);
     setLoading(false);
+
+    if (!Object.keys(results).length) {
+      setDetectionError(true);
+    } else {
+      setDetectionResults(results);
+    }
   };
 
   return (
@@ -30,21 +40,28 @@ const FaceRecognition = ({ imageURL }) => {
         {loading && (
           <LoadingSpinner imageHeight={imageHeight} imageWidth={imageWidth} />
         )}
+        {detectionError && (
+          <div
+            className={styles.detectionError}
+            style={{
+              height: imageHeight,
+              width: imageWidth,
+            }}
+          >
+            <span>Failed to detect objects</span>
+            <span>Please try a different image</span>
+          </div>
+        )}
         <img
-          id="inputImage"
-          className="vh-50 w-auto"
+          className="vh-25 vh-50-l w-auto"
           src={imageURL}
           ref={imgContainer}
           crossOrigin="anonymous"
           onLoad={onImageLoad}
         />
-        <canvas
-          id="detection"
-          style={{ position: "absolute", left: 0 }}
-          ref={canvas}
-        />
+        <canvas className="absolute left-0" ref={canvas} />
       </div>
     </div>
   );
 };
-export default FaceRecognition;
+export default Detector;

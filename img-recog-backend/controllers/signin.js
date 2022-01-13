@@ -66,13 +66,12 @@ const createSession = (user, redisClient) => {
 
 module.exports.handleAuthSignin = (req, res, db, bcrypt, redisClient) => {
   const { authorization } = req.headers;
-
   return authorization
     ? getAuthTokenId(req, res, redisClient)
     : this.handleSignin(req, res, db, bcrypt)
         .then((user) => {
           return user.id && user.email
-            ? createSession(user)
+            ? createSession(user, redisClient)
             : signInError(400, "Error signing in.");
         })
         .then((session) => res.status(200).json(session))

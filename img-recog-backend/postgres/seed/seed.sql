@@ -4,4 +4,6 @@ INSERT into users (name, email, entries, joined, bio) values ( 'Jeysen', 'jeysen
 
 INSERT into login (hash, email) values ('$2a$12$GUY548kQ4d.ydBYjijYdUu0ek7lnqglIVmIaFWcKiOOMZQuCYiCl2', 'jeysen@gmail.com');
 
+INSERT into global (name, entries) values ('orange', 5);
+
 COMMIT;

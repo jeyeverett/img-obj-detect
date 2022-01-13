@@ -3,13 +3,13 @@ services:
   img-recog-api:
     container_name: backend
     build: ./
-    command: npm start
+    command: npm run start:dev
     working_dir: /usr/src/img-recog-api
     environment:
       POSTGRES_URI: postgres://img-recog:secret@postgres:5432/img-recog-docker
       REDIS_URI: redis://redis:6379
     ports:
-      - '8080:8080'
+      - "8080:8080"
     volumes:
       - ./:/usr/src/img-recog-api
 
@@ -23,10 +23,10 @@ services:
       POSTGRES_DB: img-recog-docker
       POSTGRES_HOST: postgres
     ports:
-      - '5431:5432'
+      - "5431:5432"
 
   # Redis
   redis:
     image: redis
     ports:
-      - '6379:6379'
+      - "6379:6379"

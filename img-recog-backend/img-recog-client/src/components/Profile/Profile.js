@@ -58,7 +58,7 @@ class Profile extends React.Component {
                 className="br-100 h3 w3 dib mr3"
                 alt="avatar"
               />
-              <h1 className="f2 mv0 mt1 dib">{this.state.name}</h1>
+              <h1 className="f2 b mv0 mt1 dib">{this.state.name}</h1>
               <h4 className="f4 mt4">Images submitted: {user.entries}</h4>
               <p className="f6">
                 Member since: {new Date(user.joined).toLocaleDateString()}

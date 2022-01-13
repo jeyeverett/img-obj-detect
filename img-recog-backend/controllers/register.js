@@ -72,6 +72,7 @@ module.exports.handleRegister = (req, res, db, bcrypt, redisClient) => {
       .then(trx.commit) //we have to commit the transaction at the end
       .catch(trx.rollback); //if there were any issues, we rollback everything to its initial state
   }).catch((err) => {
+    console.log(err);
     if (err.detail.includes("already exists")) {
       res.status(400).json("Email already in use.");
     } else {
