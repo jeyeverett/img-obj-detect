@@ -72,6 +72,7 @@ module.exports.handleAuthSignin = (req, res, db, bcrypt, redisClient) => {
     ? getAuthTokenId(req, res, redisClient)
     : this.handleSignin(req, res, db, bcrypt)
         .then((user) => {
+          console.log(user);
           return user.id && user.email
             ? createSession(user, redisClient)
             : signInError(400, "Error signing in - check your credentials.");

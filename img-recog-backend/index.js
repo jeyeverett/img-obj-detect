@@ -12,15 +12,31 @@ const signout = require("./controllers/signout");
 const image = require("./controllers/image");
 const profile = require("./controllers/profile");
 const auth = require("./middleware/auth");
+const Knex = require("knex");
+const parse = require("pg-connection-string").parse;
+const pgconfig = parse(
+  "postgres://vnkgujcdirzqkn:22fc248427c2b24774b3f63cfc638ba476c2706342504911bc6e79defebf328e@ec2-44-199-52-133.compute-1.amazonaws.com:5432/db4rk7he1hlj1a"
+);
+pgconfig.ssl = { rejectUnauthorized: false };
+
+const db = Knex({
+  client: "pg",
+  connection: pgconfig,
+});
 
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 
-const db = require("knex")({
-  client: "pg",
-  connection: process.env.DATABASE_URL || process.env.POSTGRES_URI,
-});
+// const db = require("knex")({
+//   client: "pg",
+//   connection: {
+//     connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URI,
+//     ssl: {
+//       rejectUnathorized: false,
+//     },
+//   },
+// });
 
 const redisClient = redis.createClient(
   process.env.REDIS_URL || process.env.REDIS_URI
