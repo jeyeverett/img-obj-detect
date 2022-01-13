@@ -2,11 +2,13 @@ export const initialState = {
   input: "",
   imageURL: "",
   urlError: false,
+  serverError: "",
   fileUpload: false,
   route: "signin",
   isSignedIn: false,
   isProfileOpen: false,
   isLoading: false,
+  leaderboard: [],
   user: {
     id: "",
     name: "",

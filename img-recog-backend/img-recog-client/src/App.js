@@ -19,40 +19,52 @@ class App extends Component {
     this.state = initialState;
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     const token = window.sessionStorage.getItem("token");
+
     if (token) {
       this.setState({ isLoading: true });
-      fetch(`${process.env.REACT_APP_HOSTNAME}/signin`, {
-        method: "post",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data && data.id) {
-            return fetch(
-              `${process.env.REACT_APP_HOSTNAME}/profile/${data.id}`,
-              {
-                method: "get",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: "Bearer " + token,
-                },
-              }
-            );
+      try {
+        const signInRes = await fetch(
+          `${process.env.REACT_APP_HOSTNAME}/signin`,
+          {
+            method: "post",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token,
+            },
           }
-        })
-        .then((res) => res.json())
-        .then((user) => {
+        );
+
+        const data = await signInRes.json();
+
+        if (data && data.id) {
+          const profileRes = await fetch(
+            `${process.env.REACT_APP_HOSTNAME}/profile/${data.id}`,
+            {
+              method: "get",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+              },
+            }
+          );
+
+          const { user, leaderboard, error } = await profileRes.json();
+
+          if (error) {
+            this.setState({ serverError: error });
+          }
+
           if (user && user.email) {
             this.loadUser(user);
+            this.setState({ leaderboard });
             this.onRouteChange("home");
           }
-        })
-        .catch((err) => console.log(err));
+        }
+      } catch (err) {
+        console.log(err);
+      }
     }
   }
 
@@ -128,8 +140,15 @@ class App extends Component {
         }),
       });
 
-      const entries = await res.json();
+      const { entries, leaderboard, error } = await res.json();
+
+      if (error) {
+        this.setState({ serverError: error });
+        return;
+      }
+
       this.setState(Object.assign(this.state.user, { entries }));
+      this.setState({ leaderboard });
     } catch (err) {
       console.log(err);
     }
@@ -176,11 +195,13 @@ class App extends Component {
       isProfileOpen,
       user,
       isLoading,
+      serverError,
+      leaderboard,
     } = this.state;
 
     return (
       <div
-        className="App w-80 w-60-ns"
+        className="App w-80 w-60-ns mb4"
         style={{ margin: "0 auto", marginTop: "8rem" }}
       >
         <Navigation
@@ -217,6 +238,7 @@ class App extends Component {
                 Invalid URL - try a different one!
               </div>
             )}
+            {serverError && <div className="mb2 dark-red">{serverError}</div>}
             <ImageLoader
               onInputChange={this.onInputChange}
               onDetectImage={this.onDetectImage}
@@ -241,7 +263,7 @@ class App extends Component {
                 File
               </Button>
             </ButtonGroup>
-            <Leaderboard />
+            <Leaderboard leaderboard={leaderboard} />
           </div>
         ) : route === "signin" ? (
           <SignIn

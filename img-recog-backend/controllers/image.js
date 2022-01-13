@@ -13,25 +13,35 @@ const handleApiCall = (req, res) => {
 
 const handleEntries = async (req, res, db) => {
   const { id, results } = req.body;
-  const numObjects = Object.values(results).length;
+  const detectedObjects = Object.keys(results);
+  const numObjects = detectedObjects.length;
+
   try {
     const entries = await db("users")
       .where("id", "=", id)
       .increment("entries", numObjects)
       .returning("entries");
 
-    const global = await db("global").orderBy("entries", "desc");
+    for (const object of detectedObjects) {
+      const name = object.toLowerCase();
 
-    // const global = await db
-    // .select("*")
-    // .from("global")
-    // .where("name", "=", "orange");
+      const exists = await db
+        .select("*")
+        .from("global")
+        .where("name", "=", name);
 
-    console.log(global);
+      if (exists[0]) {
+        await db("global").where("name", "=", name).increment("entries", 1);
+      } else {
+        await db("global").insert({ name, entries: 1 });
+      }
+    }
 
-    res.json(entries[0]);
+    const leaderboard = await db("global").orderBy("entries", "desc").limit(5);
+
+    res.json({ entries: entries[0], leaderboard });
   } catch (err) {
-    res.status(400).json("Error retrieving user.");
+    res.status(400).json({ error: "Error retrieving updated entries." });
   }
 };
 

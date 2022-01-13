@@ -54,7 +54,7 @@ class Profile extends React.Component {
             </button>
             <div className="tc">
               <img
-                src="http://tachyons.io/img/logo.jpg"
+                src="avatar.png"
                 className="br-100 h3 w3 dib mr3"
                 alt="avatar"
               />

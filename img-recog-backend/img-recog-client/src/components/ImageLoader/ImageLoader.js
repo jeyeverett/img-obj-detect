@@ -6,7 +6,7 @@ import { InputGroup, Input, Button } from "reactstrap";
 const ImageLoader = ({ onInputChange, onDetectImage, fileUpload }) => {
   return (
     <div className="flex justify-center">
-      <InputGroup className="w-80 w-60-ns">
+      <InputGroup>
         <Input
           placeholder="Enter a valid image URL"
           onChange={onInputChange}

@@ -10,7 +10,7 @@ const Rank = ({ entries, name }) => {
       >
         <CardBody>
           <CardTitle
-            className="f4 f3-ns b"
+            className="f4 f3-ns b mb0"
             tag="h3"
           >{`${name}, you've detected ${entries} different objects!`}</CardTitle>
         </CardBody>
