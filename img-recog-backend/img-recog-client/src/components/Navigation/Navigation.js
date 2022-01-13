@@ -6,7 +6,7 @@ const Navigation = ({ onRouteChange, isSignedIn, toggleModal, isLoading }) => {
   if (isSignedIn) {
     return (
       <nav
-        className="mt2"
+        className="pt3"
         style={{ display: "flex", justifyContent: "flex-end" }}
       >
         <ProfileIcon onRouteChange={onRouteChange} toggleModal={toggleModal} />
@@ -16,7 +16,13 @@ const Navigation = ({ onRouteChange, isSignedIn, toggleModal, isLoading }) => {
     return isLoading ? (
       ""
     ) : (
-      <nav style={{ display: "flex", justifyContent: "flex-end" }}>
+      <nav
+        className="pt3"
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+        }}
+      >
         <p
           onClick={() => onRouteChange("signin")}
           className="f4 link dim grey ph4 pointer"

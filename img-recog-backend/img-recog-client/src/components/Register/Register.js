@@ -42,6 +42,12 @@ class Register extends React.Component {
             leaderboard: data.leaderboard,
           });
           this.props.onRouteChange("home");
+        } else {
+          this.props.loadUser({
+            user: null,
+            leaderboard: null,
+            error: data,
+          });
         }
       })
       .catch((err) => console.log(err));
@@ -51,10 +57,11 @@ class Register extends React.Component {
       <article className="br2 ba b--black-20 mv4 w-100 w-50-m w-25-l mw6 center shadow-5">
         <main className="pa4 black-80">
           <div className="measure">
+            {this.props.serverError && <p>{this.props.serverError}</p>}
             <fieldset id="sign_up" className="ba b--transparent ph0 mh0">
               <legend className="f3 fw6 ph0 mh0">Register</legend>
               <div className="mt3">
-                <label className="db fw6 lh-copy f6" htmlFor="email-address">
+                <label className="db fw6 lh-copy f6 tl" htmlFor="email-address">
                   Name
                 </label>
                 <input
@@ -66,7 +73,7 @@ class Register extends React.Component {
                 />
               </div>
               <div className="mt3">
-                <label className="db fw6 lh-copy f6" htmlFor="email-address">
+                <label className="db fw6 lh-copy f6 tl" htmlFor="email-address">
                   Email
                 </label>
                 <input
@@ -78,7 +85,7 @@ class Register extends React.Component {
                 />
               </div>
               <div className="mv3">
-                <label className="db fw6 lh-copy f6" htmlFor="password">
+                <label className="db fw6 lh-copy f6 tl" htmlFor="password">
                   Password
                 </label>
                 <input

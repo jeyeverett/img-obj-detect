@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const signInError = (status, message) => {
   let error = new Error();
   error.status = status;
-  error.message = message;
+  error.errorMessage = message;
   return error;
 };
 
@@ -39,7 +39,9 @@ const getAuthTokenId = (req, res, redisClient) => {
 
   return redisClient.get(authorization.split(" ")[1], (err, reply) => {
     if (err || !reply) {
-      return res.status(401).json({ message: "Unauthorized - Access Denied." });
+      return res
+        .status(401)
+        .json({ errorMessage: "Unauthorized - Access Denied." });
     }
     return res.json({ id: reply });
   });
@@ -72,9 +74,10 @@ module.exports.handleAuthSignin = (req, res, db, bcrypt, redisClient) => {
         .then((user) => {
           return user.id && user.email
             ? createSession(user, redisClient)
-            : signInError(400, "Error signing in.");
+            : signInError(400, "Error signing in - check your credentials.");
         })
         .then((session) => res.status(200).json(session))
+
         .catch((err) =>
           res.status(err.status || 400).json(err.message || "Sign in failed.")
         );

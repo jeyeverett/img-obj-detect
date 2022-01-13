@@ -64,6 +64,11 @@ class App extends Component {
   }
 
   loadUser = ({ user, leaderboard, error }) => {
+    if (!user) {
+      this.setState({ serverError: error });
+      return;
+    }
+
     this.setState((state) => ({
       leaderboard: leaderboard || state.leaderboard,
       serverError: error ? error : "",
@@ -152,6 +157,7 @@ class App extends Component {
   };
 
   onRouteChange = (route) => {
+    this.setState({ serverError: "" });
     const token = window.sessionStorage.getItem("token");
     if (route === "signout") {
       fetch(`${process.env.REACT_APP_HOSTNAME}/signout`, {
@@ -197,84 +203,88 @@ class App extends Component {
     } = this.state;
 
     return (
-      <div
-        className="App w-80 w-60-ns"
-        style={{ margin: "0 auto", marginTop: "8rem", marginBottom: "4rem" }}
-      >
+      <>
         <Navigation
           isSignedIn={isSignedIn}
           onRouteChange={this.onRouteChange}
           toggleModal={this.toggleModal}
           isLoading={isLoading}
         />
-        {isProfileOpen && (
-          <Modal>
-            <Profile
-              isProfileOpen={isProfileOpen}
-              toggleModal={this.toggleModal}
-              user={user}
-              loadUser={this.loadUser}
-            />
-          </Modal>
-        )}
-        {route === "home" ? (
-          <div className="w-min">
-            <Rank
-              name={this.state.user.name}
-              entries={this.state.user.entries}
-            />
-            {imageURL && (
-              <Detector
-                imageURL={imageURL}
-                faceBoxes={faceBoxes}
-                setDetectionResults={this.setDetectionResults}
+        <div
+          className="App w-80 w-60-ns"
+          style={{ margin: "0 auto", marginTop: "8rem", marginBottom: "4rem" }}
+        >
+          {isProfileOpen && (
+            <Modal>
+              <Profile
+                isProfileOpen={isProfileOpen}
+                toggleModal={this.toggleModal}
+                user={user}
+                loadUser={this.loadUser}
               />
-            )}
-            {urlError && (
-              <div className="mb2 dark-red">
-                Invalid URL - try a different one!
-              </div>
-            )}
-            {serverError && <div className="mb2 dark-red">{serverError}</div>}
-            <ImageLoader
-              onInputChange={this.onInputChange}
-              onDetectImage={this.onDetectImage}
-              fileUpload={this.state.fileUpload}
+            </Modal>
+          )}
+          {route === "home" ? (
+            <div className="w-min">
+              <Rank
+                name={this.state.user.name}
+                entries={this.state.user.entries}
+              />
+              {imageURL && (
+                <Detector
+                  imageURL={imageURL}
+                  faceBoxes={faceBoxes}
+                  setDetectionResults={this.setDetectionResults}
+                />
+              )}
+              {urlError && (
+                <div className="mb2 dark-red">
+                  Invalid URL - try a different one!
+                </div>
+              )}
+              {serverError && <div className="mb2 dark-red">{serverError}</div>}
+              <ImageLoader
+                onInputChange={this.onInputChange}
+                onDetectImage={this.onDetectImage}
+                fileUpload={this.state.fileUpload}
+              />
+              <ButtonGroup className="mt3">
+                <Button
+                  color="secondary"
+                  className="mr1"
+                  name="url"
+                  onClick={this.toggleInput}
+                  active={!this.state.fileUpload}
+                >
+                  URL
+                </Button>
+                <Button
+                  color="secondary"
+                  name="file"
+                  active={this.state.fileUpload}
+                  onClick={this.toggleInput}
+                >
+                  File
+                </Button>
+              </ButtonGroup>
+              <Leaderboard leaderboard={leaderboard} />
+            </div>
+          ) : route === "signin" ? (
+            <SignIn
+              onRouteChange={this.onRouteChange}
+              loadUser={this.loadUser}
+              isLoading={isLoading}
+              serverError={serverError}
             />
-            <ButtonGroup className="mt3">
-              <Button
-                color="secondary"
-                className="mr1"
-                name="url"
-                onClick={this.toggleInput}
-                active={!this.state.fileUpload}
-              >
-                URL
-              </Button>
-              <Button
-                color="secondary"
-                name="file"
-                active={this.state.fileUpload}
-                onClick={this.toggleInput}
-              >
-                File
-              </Button>
-            </ButtonGroup>
-            <Leaderboard leaderboard={leaderboard} />
-          </div>
-        ) : route === "signin" ? (
-          <SignIn
-            onRouteChange={this.onRouteChange}
-            loadUser={this.loadUser}
-            isLoading={isLoading}
-          />
-        ) : (
-          <Register
-            onRouteChange={this.onRouteChange}
-            loadUser={this.loadUser}
-          />
-        )}
-      </div>
+          ) : (
+            <Register
+              onRouteChange={this.onRouteChange}
+              loadUser={this.loadUser}
+              serverError={serverError}
+            />
+          )}
+        </div>
+      </>
     );
   }
 }

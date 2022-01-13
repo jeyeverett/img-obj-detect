@@ -26,22 +26,25 @@ const redisClient = redis.createClient(
   process.env.REDIS_URL || process.env.REDIS_URI
 );
 
-app.use((req, res, next) => {
-  res.setHeader(
-    "Access-Control-Allow-Origin",
-    process.env.HOSTNAME || "https://img-recog-api.herokuapp.com"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "OPTIONS, GET, POST, PUT, PATCH, DELETE"
-  );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  return next();
-});
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+  app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "OPTIONS, GET, POST, PUT, PATCH, DELETE"
+    );
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization"
+    );
+    return next();
+  });
+}
 
 app.use(express.static(path.join(__dirname, "img-recog-client/build")));
 
-app.get("*", (req, res) => {
+app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "img-recog-client/build", "index.html"));
 });
 

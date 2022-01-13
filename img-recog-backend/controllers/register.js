@@ -22,6 +22,7 @@ const createSession = async (user, redisClient) => {
 
 module.exports.handleRegister = (req, res, db, bcrypt, redisClient) => {
   const { name, email, password } = req.body;
+  console.log(name, email, password);
 
   if (!name || !email || !password) {
     return res
@@ -39,9 +40,9 @@ module.exports.handleRegister = (req, res, db, bcrypt, redisClient) => {
   );
   //Need to add password match later: !password.match(formatPass)
   if (!email.match(formatEmail)) {
-    const message =
+    const errorMessage =
       "Error with credentials - email must be formatted as example@example.com - password..";
-    return res.status(404).json(["Failed", { success: false, message }]);
+    return res.status(404).json(["Failed", { success: false, errorMessage }]);
   }
 
   const hash = bcrypt.hashSync(password, 10);
@@ -78,7 +79,7 @@ module.exports.handleRegister = (req, res, db, bcrypt, redisClient) => {
       .then(trx.commit) //we have to commit the transaction at the end
       .catch(trx.rollback); //if there were any issues, we rollback everything to its initial state
   }).catch((err) => {
-    if (err.detail.includes("already exists")) {
+    if (err.detail && err.detail.includes("already exists")) {
       res.status(400).json("Email already in use.");
     } else {
       res.status(400).json("Unable to register user.");

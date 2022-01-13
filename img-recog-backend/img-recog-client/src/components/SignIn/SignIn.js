@@ -19,6 +19,7 @@ class SignIn extends React.Component {
 
   onSubmitSignIn = async () => {
     const { signInEmail, signInPassword } = this.state;
+
     if (!signInEmail || !signInPassword) {
       return;
     }
@@ -36,28 +37,52 @@ class SignIn extends React.Component {
       const data = await res.json();
 
       if (data.userId && data.success === "true") {
-        window.sessionStorage.setItem("token", data.token);
-
-        const res = await fetch(
-          `${process.env.REACT_APP_HOSTNAME}/profile/${data.userId}`,
-          {
-            method: "get",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: "Bearer " + data.token,
-            },
-          }
-        );
-
-        const { user, leaderboard, error } = await res.json();
-
-        if (user && user.email) {
-          this.props.loadUser({ user, leaderboard, error });
-          this.props.onRouteChange("home");
-        }
+        this.getProfile(data);
+      } else if (data.errorMessage) {
+        this.props.loadUser({
+          user: null,
+          leaderboard: null,
+          error: data.errorMessage,
+        });
       }
     } catch (err) {
-      console.log(err);
+      console.log("Failed to sign in", err);
+      this.props.loadUser({
+        user: null,
+        leaderboard: null,
+        error: "Failed to sign in",
+      });
+    }
+  };
+
+  getProfile = async ({ userId, success, token }) => {
+    window.sessionStorage.setItem("token", token);
+
+    try {
+      const getProfile = await fetch(
+        `${process.env.REACT_APP_HOSTNAME}/profile/${userId}`,
+        {
+          method: "get",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
+          },
+        }
+      );
+
+      const { user, leaderboard, error } = await getProfile.json();
+
+      if (user && user.email) {
+        this.props.loadUser({ user, leaderboard, error });
+        this.props.onRouteChange("home");
+      }
+    } catch (err) {
+      console.log("Failed to fetch profile", err);
+      this.props.loadUser({
+        user: null,
+        leaderboard: null,
+        error: "Failed to fetch profile",
+      });
     }
   };
 
@@ -69,10 +94,13 @@ class SignIn extends React.Component {
       <article className="br2 ba b--black-20 mv4 w-100 w-50-m w-25-l mw6 center shadow-5">
         <main className="pa4 black-80">
           <div className="measure">
+            {this.props.serverError && (
+              <p className="">{this.props.serverError}</p>
+            )}
             <fieldset id="sign_up" className="ba b--transparent ph0 mh0">
               <legend className="f3 fw6 ph0 mh0">Sign In</legend>
               <div className="mt3">
-                <label className="db fw6 lh-copy f6" htmlFor="email-address">
+                <label className="db fw6 lh-copy tl f6" htmlFor="email-address">
                   Email
                 </label>
                 <input
@@ -84,7 +112,7 @@ class SignIn extends React.Component {
                 />
               </div>
               <div className="mv3">
-                <label className="db fw6 lh-copy f6" htmlFor="password">
+                <label className="db fw6 lh-copy f6 tl" htmlFor="password">
                   Password
                 </label>
                 <input
