@@ -8,13 +8,11 @@ body {
 }
 
 h1 {
-  font: 2em 'Roboto', sans-serif;
+  font: 2em "Roboto", sans-serif;
   margin-bottom: 40px;
 }
 
 .spinner-container {
-  height: 80vh;
-  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;

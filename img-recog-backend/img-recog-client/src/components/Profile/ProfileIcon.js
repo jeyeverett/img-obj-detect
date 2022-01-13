@@ -1,10 +1,10 @@
-import React from 'react';
+import React from "react";
 import {
   Dropdown,
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
-} from 'reactstrap';
+} from "reactstrap";
 
 class ProfileIcon extends React.Component {
   constructor(props) {
@@ -34,14 +34,19 @@ class ProfileIcon extends React.Component {
           />
         </DropdownToggle>
         <DropdownMenu
-          className="b--transparent shadow-5 mt4"
-          style={{ backgroundColor: 'rgba(255,255,255,0.5)' }}
+          className={`b--transparent shadow-5 mt4 overflow-hidden ${
+            dropdownOpen ? "w-auto" : "w-0"
+          }`}
+          style={{ backgroundColor: "rgba(255,255,255,0.5)" }}
           right
         >
-          <DropdownItem onClick={() => this.props.toggleModal()}>
-            View profile
+          <DropdownItem onClick={() => this.props.onRouteChange("home")}>
+            Home
           </DropdownItem>
-          <DropdownItem onClick={() => this.props.onRouteChange('signout')}>
+          <DropdownItem onClick={() => this.props.toggleModal()}>
+            Profile
+          </DropdownItem>
+          <DropdownItem onClick={() => this.props.onRouteChange("signout")}>
             Sign out
           </DropdownItem>
         </DropdownMenu>

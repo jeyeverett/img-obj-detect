@@ -12,10 +12,10 @@ class Rank extends React.Component {
   render() {
     return (
       <div>
-        <div className="white f3">
+        <div className="white f3-ns">
           {`${this.props.name}, your current entry count is...`}
         </div>
-        <div className="white f1">
+        <div className="white f3 f1-ns">
           {typeof this.props.entries === "string"
             ? `${this.props.entries}  `
             : ""}

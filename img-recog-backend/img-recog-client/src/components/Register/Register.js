@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 class Register extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      email: '',
-      password: '',
-      name: '',
+      email: "",
+      password: "",
+      name: "",
     };
   }
   onNameChange = (event) => {
@@ -24,9 +24,9 @@ class Register extends React.Component {
     if (!name || !email || !password) {
       return;
     }
-    fetch('http://localhost:8080/register', {
-      method: 'post',
-      headers: { 'Content-Type': 'application/json' },
+    fetch(`${process.env.REACT_APP_HOSTNAME}/register`, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name,
         email,
@@ -36,9 +36,9 @@ class Register extends React.Component {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          window.sessionStorage.setItem('token', data.token);
+          window.sessionStorage.setItem("token", data.token);
           this.props.loadUser(data.user);
-          this.props.onRouteChange('home');
+          this.props.onRouteChange("home");
         }
       })
       .catch((err) => console.log(err));
@@ -99,7 +99,7 @@ class Register extends React.Component {
               <p
                 href="#0"
                 className="f6 link dim black db pointer"
-                onClick={() => this.props.onRouteChange('signin')}
+                onClick={() => this.props.onRouteChange("signin")}
               >
                 Sign in
               </p>

@@ -1,5 +1,6 @@
-import React from 'react';
-import './Profile.css';
+import React from "react";
+import "./Profile.css";
+
 class Profile extends React.Component {
   constructor(props) {
     super(props);
@@ -18,11 +19,11 @@ class Profile extends React.Component {
   };
 
   updateUser = (data) => {
-    fetch(`http://localhost:8080/profile/${this.props.user.id}`, {
-      method: 'put',
+    fetch(`${process.env.REACT_APP_HOSTNAME}/profile/${this.props.user.id}`, {
+      method: "put",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + window.sessionStorage.getItem('token'),
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + window.sessionStorage.getItem("token"),
       },
       body: JSON.stringify({
         name: data.name,
@@ -42,8 +43,11 @@ class Profile extends React.Component {
   render() {
     const { toggleModal, user } = this.props;
     return (
-      <div className="profile-modal">
-        <article className="br2 ba b--black-20 mv4 w-100 w-50-m w-25-l mw6 center bg-light shadow-5 h-5">
+      <div className="profile-modal" onClick={toggleModal}>
+        <article
+          className="br2 ba b--black-20 mv4 w-100 w-50-m w-25-l mw6 center bg-light shadow-5 h-5"
+          onClick={(e) => e.stopPropagation()}
+        >
           <main className="pa4 black-80 w-80 relative">
             <button className="exit-profile f2" onClick={toggleModal}>
               &times;
@@ -70,7 +74,7 @@ class Profile extends React.Component {
               name="username"
               id="name"
               maxLength="15"
-              style={{ outline: 'none' }}
+              style={{ outline: "none" }}
               value={this.state.name}
               onChange={this.onNameChange}
             />
@@ -82,15 +86,15 @@ class Profile extends React.Component {
               type="text"
               name="bio"
               id="bio"
-              value={this.state.bio || 'Write your bio here...'}
-              style={{ outline: 'none', resize: 'none' }}
+              value={this.state.bio || "Write your bio here..."}
+              style={{ outline: "none", resize: "none" }}
               onChange={(event) => this.onBioChange(event)}
             />
             <div className="flex justify-center">
               <button
                 className="br2 b--dark ph3 pv1 fw6 shadow-5 grow"
                 style={{
-                  backgroundColor: 'rgba(255,255,255,.5)',
+                  backgroundColor: "rgba(255,255,255,.5)",
                 }}
                 onClick={() => this.updateUser({ ...this.state })}
               >

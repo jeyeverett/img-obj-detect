@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
+import LoadingSpinner from "../LoadingSpinner/LoadingSpinner";
 
-import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 class SignIn extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      signInEmail: '',
-      signInPassword: '',
+      signInEmail: "",
+      signInPassword: "",
     };
   }
 
@@ -17,41 +17,50 @@ class SignIn extends React.Component {
     this.setState({ signInPassword: event.target.value });
   };
 
-  onSubmitSignIn = () => {
+  onSubmitSignIn = async () => {
     const { signInEmail, signInPassword } = this.state;
     if (!signInEmail || !signInPassword) {
       return;
     }
-    fetch('http://localhost:8080/signin', {
-      method: 'post',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: this.state.signInEmail,
-        password: this.state.signInPassword,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.userId && data.success === 'true') {
-          window.sessionStorage.setItem('token', data.token);
-          return fetch(`http://localhost:8080/profile/${data.userId}`, {
-            method: 'get',
+
+    try {
+      const res = await fetch(`${process.env.REACT_APP_HOSTNAME}/signin`, {
+        method: "post",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: this.state.signInEmail,
+          password: this.state.signInPassword,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.userId && data.success === "true") {
+        window.sessionStorage.setItem("token", data.token);
+
+        const res = await fetch(
+          `${process.env.REACT_APP_HOSTNAME}/profile/${data.userId}`,
+          {
+            method: "get",
             headers: {
-              'Content-Type': 'application/json',
-              Authorization: 'Bearer ' + data.token,
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + data.token,
             },
-          });
-        }
-      })
-      .then((res) => res.json())
-      .then((user) => {
+          }
+        );
+
+        const user = await res.json();
+
         if (user && user.email) {
           this.props.loadUser(user);
-          this.props.onRouteChange('home');
+          this.props.onRouteChange("home");
         }
-      })
-      .catch((err) => console.log('Invalid username or password.'));
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
+
   render() {
     const { onRouteChange, isLoading } = this.props;
     return isLoading ? (
@@ -99,7 +108,7 @@ class SignIn extends React.Component {
               <p
                 href="#0"
                 className="f6 link dim black db pointer"
-                onClick={() => onRouteChange('register')}
+                onClick={() => onRouteChange("register")}
               >
                 Register
               </p>

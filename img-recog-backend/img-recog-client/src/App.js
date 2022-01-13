@@ -1,19 +1,20 @@
 import React, { Component } from "react";
 import "./App.css";
-
 import Navigation from "./components/Navigation/Navigation";
 import SignIn from "./components/SignIn/SignIn";
 import Register from "./components/Register/Register";
-import ImageLinkForm from "./components/ImageLinkForm/ImageLinkForm";
+import ImageLoader from "./components/ImageLoader/ImageLoader";
 import Rank from "./components/Rank/Rank";
 import FaceRecognition from "./components/FaceRecognition/FaceRecognition";
 import Modal from "./components/Modal/Modal";
 import Profile from "./components/Profile/Profile";
+import { Button, ButtonGroup } from "reactstrap";
 
 const initialState = {
   input: "",
   imageURL: "",
-  faceBoxes: [],
+  urlError: false,
+  fileUpload: false,
   route: "signin",
   isSignedIn: false,
   isProfileOpen: false,
@@ -34,10 +35,9 @@ class App extends Component {
   }
   componentDidMount() {
     const token = window.sessionStorage.getItem("token");
-    console.log(token);
     if (token) {
       this.setState({ isLoading: true });
-      fetch("http://localhost:8080/signin", {
+      fetch(`${process.env.REACT_APP_HOSTNAME}/signin`, {
         method: "post",
         headers: {
           "Content-Type": "application/json",
@@ -47,13 +47,16 @@ class App extends Component {
         .then((res) => res.json())
         .then((data) => {
           if (data && data.id) {
-            return fetch(`http://localhost:8080/profile/${data.id}`, {
-              method: "get",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
-              },
-            });
+            return fetch(
+              `${process.env.REACT_APP_HOSTNAME}/profile/${data.id}`,
+              {
+                method: "get",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: "Bearer " + token,
+                },
+              }
+            );
           }
         })
         .then((res) => res.json())
@@ -81,41 +84,47 @@ class App extends Component {
     });
   };
 
-  processFaceDetection = (boxRegions) => {
-    for (let region of boxRegions) {
-      const { bounding_box } = region.region_info;
-      this.displayFaceBox(this.calcFaceBox(bounding_box));
+  onInputChange = async ({ target }) => {
+    if (this.state.fileUpload && target.files.length) {
+      const uploadedImageUrl = URL.createObjectURL(target.files[0]);
+      this.setState({ input: uploadedImageUrl });
+    } else if (target.value.length > 20) {
+      this.isValidUrl(target.value).then((res) => {
+        if (res) {
+          this.setState({ input: target.value });
+          this.setState({ urlError: false });
+        } else {
+          this.setState({ urlError: true });
+        }
+      });
+      return;
     }
   };
 
-  displayFaceBox = (calcBox) => {
-    this.setState((state, props) => ({
-      faceBoxes: [...state.faceBoxes, { ...calcBox }],
-    }));
-  };
-  // {bottom_row, left_col, right_col, top_row}
-  calcFaceBox = ({ bottom_row, left_col, right_col, top_row }) => {
-    const image = document.getElementById("inputImage");
-    const width = Number(image.width);
-    const height = Number(image.height);
-    return {
-      topRow: top_row * height,
-      rightCol: width - right_col * width,
-      bottomRow: height - bottom_row * height,
-      leftCol: left_col * width,
-    };
+  isValidUrl = async (url) => {
+    try {
+      const res = await fetch(url);
+      const buff = await res.blob();
+      return buff.type.startsWith("image/");
+    } catch (err) {
+      return false;
+    }
   };
 
-  onInputChange = (event) => {
-    this.setState({ input: event.target.value });
+  toggleInput = ({ target }) => {
+    if (target.name === "file") {
+      this.setState({ fileUpload: true });
+    } else {
+      this.setState({ fileUpload: false });
+    }
   };
 
-  onDetectImage = () => {
-    this.setState({ imageURL: this.state.input, faceBoxes: [] });
+  onDetectImage = (event) => {
+    this.setState({ imageURL: this.state.input });
+    return;
+
     const token = window.sessionStorage.getItem("token");
-    //Note that below we use this.state.input instead of this.state.imageURL because setState is asynchronous and therefore there is a delay when updating state (input was updated in a separate function so it is ok)
-    fetch("http://localhost:8080/imageurl", {
-      //send the image url to the backend for API processing
+    fetch(`${process.env.REACT_APP_HOSTNAME}/imageurl`, {
       method: "post",
       headers: {
         "Content-Type": "application/json",
@@ -130,7 +139,7 @@ class App extends Component {
       .then((res) => {
         if (res) {
           //If there is a response increment the entries field on the backend
-          fetch("http://localhost:8080/image", {
+          fetch(`${process.env.REACT_APP_HOSTNAME}/image`, {
             method: "put",
             headers: {
               "Content-Type": "application/json",
@@ -142,8 +151,6 @@ class App extends Component {
           })
             .then((res) => res.json())
             .then((count) => {
-              //If backend successfully updates, increment the entries field on the front end
-              //Below we use 'Object.assign' to update just the entries field of the user (if we just did { user: { entries: count }} we would overwrite the entire object
               this.setState(Object.assign(this.state.user, { entries: count }));
             })
             .catch((err) => console.log(err));
@@ -156,7 +163,7 @@ class App extends Component {
   onRouteChange = (route) => {
     const token = window.sessionStorage.getItem("token");
     if (route === "signout") {
-      fetch("http://localhost:8080/signout", {
+      fetch(`${process.env.REACT_APP_HOSTNAME}/signout`, {
         method: "post",
         headers: {
           "Content-Type": "application/json",
@@ -188,6 +195,7 @@ class App extends Component {
     const {
       isSignedIn,
       imageURL,
+      urlError,
       faceBoxes,
       route,
       isProfileOpen,
@@ -214,16 +222,43 @@ class App extends Component {
           </Modal>
         )}
         {route === "home" ? (
-          <div>
+          <div className="w-min">
             <Rank
               name={this.state.user.name}
               entries={this.state.user.entries}
             />
-            <FaceRecognition imageURL={imageURL} faceBoxes={faceBoxes} />
-            <ImageLinkForm
+            {imageURL && (
+              <FaceRecognition imageURL={imageURL} faceBoxes={faceBoxes} />
+            )}
+            {urlError && (
+              <div className="mb2 dark-red">
+                Invalid URL - try a different one!
+              </div>
+            )}
+            <ImageLoader
               onInputChange={this.onInputChange}
               onDetectImage={this.onDetectImage}
+              fileUpload={this.state.fileUpload}
             />
+            <ButtonGroup className="mt3">
+              <Button
+                color="secondary"
+                className="mr1"
+                name="url"
+                onClick={this.toggleInput}
+                active={!this.state.fileUpload}
+              >
+                URL
+              </Button>
+              <Button
+                color="secondary"
+                name="file"
+                active={this.state.fileUpload}
+                onClick={this.toggleInput}
+              >
+                File
+              </Button>
+            </ButtonGroup>
           </div>
         ) : route === "signin" ? (
           <SignIn
